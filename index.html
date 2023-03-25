@@ -26,7 +26,7 @@
               <a href="index.html"><strong>issuance</strong></a>
             </h1>
             <p className="description">
-              Open, free blogging on <strong>Github pages</strong> with <strong>Github issues</strong>.
+              Today I learn.
             </p>
           </div>
         `;
@@ -39,8 +39,8 @@
           async function fetchIssues() {
             if (!issues) {
               const { url, ...options } = endpoint("GET /repos/:owner/:repo/issues", {
-                owner: "mateogianolio",
-                repo: "issuance",
+                owner: "eneim",
+                repo: "til",
                 auth: 'x'
               });
               const res = await fetch(url, options);
