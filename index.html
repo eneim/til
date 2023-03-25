@@ -5,9 +5,18 @@
     <title>NAM's TIL</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="NAM's TIL.">
 
     <link rel="stylesheet" type="text/css" href="css/structure.css">
     <link rel="stylesheet" type="text/css" href="css/typography.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <!-- <link rel="stylesheet" type="text/css" href="css/prettify.css"> -->
+    <link href='https://fonts.googleapis.com/css?family=PT+Serif:400,400i,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=PT+Sans:700' rel='stylesheet' type='text/css'>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.20.0/themes/prism.min.css" rel="stylesheet" />
+
+    <script src="https://buttons.github.io/buttons.js"></script>
+
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=PT+Serif">
     <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
 
@@ -32,20 +41,79 @@
         `;
       }
 
+      const Comments = (props) => {
+        const [comments, setComments] = React.useState();
+        const {
+          search,
+        } = window.location;
+
+        React.useEffect(() => {
+          async function fetchComments() {
+            const issue_number = search.slice(1);
+            if (issue_number && !comments) {
+              const { url, ...options } = endpoint('GET /repos/:owner/:repo/issues/:issue_number/comments', {
+                owner: 'casualjavascript',
+                repo: 'blog',
+                issue_number,
+              });
+
+              console.log(options);
+              const res = await fetch(url, options);
+              setComments(await res.json());
+
+              Prism.highlightAll();
+            }
+          }
+
+          fetchComments();
+        }, [search, comments]);
+
+        return html`
+          <div id="comments" className="comments">
+            <h1>Comments</h1>
+            ${(comments || [])
+              .map(({
+                id,
+                user: {
+                  html_url,
+                  login,
+                },
+                created_at,
+                body,
+              }) => html`
+                <div key=${id} className="comment">
+                  <a className="author" href="${html_url}">
+                    ${login}
+                  </a>
+                  <span className="date">
+                    ${'commented '}
+                    ${new Date(created_at).toLocaleDateString()} ${new Date(created_at).toLocaleTimeString()}:
+                  </span>
+                  <div
+                    className="body"
+                    dangerouslySetInnerHTML="${{ __html: marked(body)}}"
+                  />
+                </div>
+              `)}
+          </div>
+        `;
+      }
+
       const Posts = (props) => {
         const [issues, setIssues] = React.useState();
 
         React.useEffect(() => {
           async function fetchIssues() {
             if (!issues) {
-              const { url, ...options } = endpoint("GET /repos/:owner/:repo/issues", {
-                owner: "eneim",
-                repo: "til",
-                creator: "eneim",
-                auth: 'x'
+              const { url, ...options } = endpoint('GET /repos/:owner/:repo/issues', {
+                owner: 'casualjavascript',
+                repo: 'blog',
               });
+              
               const res = await fetch(url, options);
               setIssues(await res.json());
+
+              Prism.highlightAll();
             }
           }
 
@@ -100,22 +168,25 @@
                     <span>${new Date(created_at).toLocaleDateString()} </span>
                     ${comments
                       ? html`
-                        <a href="?${number}">
+                        <a href="?${number}#comments">
                           ${comments} comment(s)
                         </a>
                       `
                       : null
                     }
                   </div>
-                  <div
-                    className="body"
-                    dangerouslySetInnerHTML="${{ __html: marked(body).replace(/<pre>/g, '<pre class="prettyprint">')}}"
-                  />
+                  ${search && Number(search.slice(1)) === number && html`
+                    <div
+                      className="body"
+                      dangerouslySetInnerHTML="${{ __html: marked(body)}}"
+                    />
+                    <${Comments} />
+                  `}
                 </div>
               `)}
           </div>
-        `
-      }
+        `;
+      };
 
       ReactDOM.render(
         html`
