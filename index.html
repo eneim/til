@@ -106,8 +106,9 @@
           async function fetchIssues() {
             if (!issues) {
               const { url, ...options } = endpoint('GET /repos/:owner/:repo/issues', {
-                owner: 'casualjavascript',
-                repo: 'blog',
+                owner: 'eneim',
+                repo: 'til',
+                creator: 'eneim'
               });
               
               const res = await fetch(url, options);
