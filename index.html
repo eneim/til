@@ -107,7 +107,8 @@
             if (!issues) {
               const { url, ...options } = endpoint('GET /repos/:owner/:repo/issues', {
                 owner: 'eneim',
-                repo: 'til'
+                repo: 'til',
+                creator: 'eneim'
               });
               
               const res = await fetch(url, options);
