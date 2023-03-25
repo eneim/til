@@ -127,7 +127,7 @@
         return html`
           <div className="posts">
             ${(issues || [])
-              .filter(({ user }) => user.login === 'mateogianolio')
+              .filter(({ user }) => user.login === 'eneim')
               .filter(({ number }) => !search || Number(search.slice(1)) === number)
               .map(({
                 number,
